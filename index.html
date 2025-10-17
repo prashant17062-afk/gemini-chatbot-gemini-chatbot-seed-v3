@@ -3,539 +3,256 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini Flash Exp Chatbot</title>
+    <title>Gemini 1.5 Flash Exp Chatbot</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f7f6;
-            color: #333;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f0f2f5; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
+        #app { max-width: 800px; margin: 20px auto; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; overflow: hidden; flex-grow: 1; }
+        h1 { text-align: center; color: #1a73e8; padding: 20px; border-bottom: 1px solid #eee; margin: 0; }
+        #settings-panel { padding: 15px 20px; background-color: #f9f9f9; border-bottom: 1px solid #eee; }
+        #settings-panel summary { font-weight: bold; cursor: pointer; color: #1a73e8; list-style: none; }
+        #settings-panel summary::-webkit-details-marker { display: none; }
+        #settings-panel summary::before { content: '▶'; display: inline-block; width: 1.2em; transition: transform 0.2s ease; }
+        #settings-panel[open] summary::before { content: '▼'; transform: rotate(90deg); }
+        #settings-panel div { padding-top: 10px; }
+        #settings-panel label { display: block; margin-bottom: 5px; font-weight: 500; }
+        #settings-panel input[type="password"], #settings-panel textarea, #settings-panel input[type="number"], #settings-panel input[type="range"] {
+            width: calc(100% - 20px); padding: 8px 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;
         }
-        .container {
-            background-color: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 800px;
-            padding: 25px;
-            margin-bottom: 20px;
-            display: flex;
-            flex-direction: column;
-        }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 25px;
-            font-size: 2em;
-        }
-        .api-key-input, .settings-panel-container {
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            background-color: #fafafa;
-        }
-        .api-key-input label, .settings-panel-toggle {
-            font-weight: bold;
-            color: #555;
-            display: block;
-            margin-bottom: 8px;
-        }
-        input[type="text"], input[type="password"], input[type="number"], textarea {
-            width: calc(100% - 20px);
-            padding: 10px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 0.95em;
-            box-sizing: border-box;
-        }
-        textarea {
-            resize: vertical;
-            min-height: 60px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 18px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background-color 0.3s ease;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        #chat-messages {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 15px;
-            height: 400px;
-            overflow-y: auto;
-            margin-bottom: 20px;
-            background-color: #fcfcfc;
-            display: flex;
-            flex-direction: column;
-        }
-        .message {
-            margin-bottom: 12px;
-            padding: 10px 15px;
-            border-radius: 8px;
-            line-height: 1.5;
-            word-wrap: break-word;
-            max-width: 90%;
-            position: relative;
-        }
-        .user-message {
-            background-color: #e6f7ff;
-            align-self: flex-end;
-            text-align: right;
-            border: 1px solid #b3e0ff;
-        }
-        .bot-message {
-            background-color: #f0f0f0;
-            align-self: flex-start;
-            text-align: left;
-            border: 1px solid #e0e0e0;
-        }
-        .message .timestamp {
-            font-size: 0.75em;
-            color: #888;
-            margin-top: 5px;
-            display: block;
-        }
-        .bot-message .copy-btn {
-            background: none;
-            border: 1px solid #ccc;
-            color: #555;
-            padding: 3px 8px;
-            font-size: 0.75em;
-            border-radius: 4px;
-            cursor: pointer;
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            transition: background-color 0.2s ease, color 0.2s ease;
-        }
-        .bot-message .copy-btn:hover {
-            background-color: #e0e0e0;
-            color: #333;
-        }
-        .user-input-area {
-            display: flex;
-            align-items: flex-end;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        #user-input {
-            flex-grow: 1;
-            min-height: 40px;
-            max-height: 150px;
-            padding-right: 60px; /* Space for char counter */
-        }
-        #char-count {
-            position: absolute;
-            bottom: 15px;
-            right: 15px;
-            font-size: 0.8em;
-            color: #888;
-        }
-        .input-wrapper {
-            position: relative;
-            flex-grow: 1;
-        }
-
-        .settings-panel-toggle {
-            cursor: pointer;
-            background-color: #e9ecef;
-            padding: 10px 15px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: #333;
-            transition: background-color 0.3s ease;
-        }
-        .settings-panel-toggle:hover {
-            background-color: #dee2e6;
-        }
-        #settings-panel {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 15px;
-            background-color: #fafafa;
-            margin-bottom: 20px;
-        }
-        #settings-panel label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #555;
-        }
-        #settings-panel .setting-item {
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px dashed #eee;
-        }
-        #settings-panel .setting-item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-        #settings-panel input[type="range"] {
-            width: calc(100% - 60px);
-            vertical-align: middle;
-            margin-right: 10px;
-        }
-        #settings-panel #temperature-value, #settings-panel #max-tokens {
-            vertical-align: middle;
-            font-weight: normal;
-        }
-        #settings-panel #max-tokens {
-            width: 80px;
-            display: inline-block;
-        }
-        .checkbox-container {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .checkbox-container input {
-            width: auto;
-            margin-top: 0;
-        }
-
-        .chat-management-panel {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 10px 15px;
-            background-color: #e6f7ff;
-            border: 1px solid #b3e0ff;
-            border-radius: 8px;
-        }
-        .chat-management-panel #message-count {
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        .chat-management-panel button {
-            background-color: #007bff;
-            margin-left: 10px;
-        }
-        .chat-management-panel button:hover {
-            background-color: #0056b3;
-        }
-        #clear-btn {
-            background-color: #dc3545;
-        }
-        #clear-btn:hover {
-            background-color: #c82333;
-        }
-
-        #license-footer {
-            margin-top: 30px;
-            font-size: 0.8em;
-            color: #777;
-            text-align: center;
-            width: 100%;
-            max-width: 800px;
-            padding-top: 15px;
-            border-top: 1px solid #eee;
-        }
+        #settings-panel textarea { resize: vertical; min-height: 60px; }
+        #settings-panel input[type="checkbox"] { margin-right: 5px; }
+        .chat-management { padding: 10px 20px; background-color: #f0f2f5; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .chat-management button { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; background-color: #1a73e8; color: white; font-size: 0.9em; transition: background-color 0.2s ease; }
+        .chat-management button:hover { background-color: #155bb5; }
+        #message-count { font-size: 0.9em; color: #555; }
+        #chat-history { flex-grow: 1; padding: 20px; overflow-y: auto; background-color: #fdfdfd; border-bottom: 1px solid #eee; }
+        .message { margin-bottom: 15px; padding: 10px 15px; border-radius: 6px; position: relative; display: flex; flex-direction: column; }
+        .message.user { background-color: #e6f3ff; align-self: flex-end; margin-left: auto; text-align: right; border-bottom-right-radius: 0; }
+        .message.model { background-color: #f0f0f0; align-self: flex-start; margin-right: auto; border-bottom-left-radius: 0; }
+        .message-content { word-wrap: break-word; white-space: pre-wrap; margin-bottom: 5px; }
+        .message-footer { font-size: 0.75em; color: #777; display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+        .message.model .message-footer { justify-content: flex-start; }
+        .copy-btn { background-color: #ccc; color: #333; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7em; transition: background-color 0.2s ease; }
+        .copy-btn:hover { background-color: #bbb; }
+        .user-input-area { padding: 15px 20px; background-color: #f9f9f9; border-top: 1px solid #eee; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+        #user-input { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; resize: none; min-height: 40px; box-sizing: border-box; font-size: 1em; }
+        #send-btn { background-color: #1a73e8; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 1em; transition: background-color 0.2s ease; }
+        #send-btn:hover:not(:disabled) { background-color: #155bb5; }
+        #send-btn:disabled { background-color: #cccccc; cursor: not-allowed; }
+        .input-info { width: 100%; text-align: right; font-size: 0.85em; color: #777; padding-top: 5px; }
+        footer { text-align: center; padding: 15px; font-size: 0.8em; color: #777; border-top: 1px solid #eee; margin-top: auto; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Gemini Flash Exp Chatbot</h1>
+    <div id="app">
+        <h1>Gemini 1.5 Flash Exp Chatbot</h1>
 
-        <div class="api-key-input">
-            <label for="api-key">Gemini API Key:</label>
-            <input type="password" id="api-key" placeholder="Enter your Gemini API Key here">
-            <div class="checkbox-container" style="margin-top: 10px;">
-                <input type="checkbox" id="show-api-key">
-                <label for="show-api-key" style="margin-bottom: 0;">Show API Key</label>
-            </div>
-        </div>
+        <details id="settings-panel">
+            <summary>Settings</summary>
+            <div>
+                <label for="api-key">Google Gemini API Key:</label>
+                <input type="password" id="api-key" placeholder="Enter your API Key" required>
+                <label><input type="checkbox" id="show-api-key"> Show API Key</label>
 
-        <div id="settings-panel-toggle" class="settings-panel-toggle">
-            Settings <span id="toggle-icon">&#9660;</span>
-        </div>
-
-        <div id="settings-panel" style="display: none;">
-            <div class="setting-item">
                 <label for="system-prompt">System Prompt:</label>
-                <textarea id="system-prompt" placeholder="Define the chatbot's persona or instructions (e.g., 'You are a helpful academic assistant.')"></textarea>
-            </div>
+                <textarea id="system-prompt" rows="3" placeholder="Set a system-level instruction for the AI."></textarea>
 
-            <div class="setting-item">
                 <label for="temperature-slider">Temperature: <span id="temperature-value">1.0</span></label>
                 <input type="range" id="temperature-slider" min="0" max="2" step="0.1" value="1.0">
-            </div>
 
-            <div class="setting-item">
-                <label for="max-tokens">Max Output Tokens: </label>
+                <label for="max-tokens">Max Output Tokens: <span id="max-tokens-value">1000</span></label>
                 <input type="number" id="max-tokens" min="100" max="8192" value="1000">
             </div>
-        </div>
+        </details>
 
-        <div id="chat-messages">
-            <!-- Chat messages will be appended here -->
-        </div>
-
-        <div class="chat-management-panel">
+        <div class="chat-management">
+            <button id="clear-btn">Clear Chat</button>
+            <button id="export-btn">Export Chat</button>
             <span id="message-count">Messages: 0</span>
-            <div>
-                <button id="clear-btn">Clear Chat</button>
-                <button id="export-btn">Export Chat</button>
-            </div>
+        </div>
+
+        <div id="chat-history">
+            <!-- Chat messages will be dynamically added here -->
         </div>
 
         <div class="user-input-area">
-            <div class="input-wrapper">
-                <textarea id="user-input" placeholder="Type your message..." maxlength="2000"></textarea>
-                <span id="char-count">2000</span>
-            </div>
+            <textarea id="user-input" placeholder="Type your message..." maxlength="2000"></textarea>
             <button id="send-btn">Send</button>
+            <div class="input-info">
+                <span id="char-count">Chars: 0/2000</span>
+            </div>
         </div>
     </div>
 
-    <div id="license-footer">
+    <footer>
         MIT License
-        <br>
-        Copyright (c) 2023-2024 Your Name/Organization
-        <br>
-        Permission is hereby granted, free of charge, to any person obtaining a copy
-        of this software and associated documentation files (the "Software"), to deal
-        in the Software without restriction, including without limitation the rights
-        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-        copies of the Software, and to permit persons to whom the Software is
-        furnished to do so, subject to the following conditions:
-        <br>
-        The above copyright notice and this permission notice shall be included in all
-        copies or substantial portions of the Software.
-        <br>
-        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-        SOFTWARE.
-    </div>
+    </footer>
 
     <script>
-        // DOM Elements
+        const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=';
+        const MAX_INPUT_CHARS = 2000;
+
         const apiKeyInput = document.getElementById('api-key');
         const showApiKeyCheckbox = document.getElementById('show-api-key');
         const systemPromptTextarea = document.getElementById('system-prompt');
         const temperatureSlider = document.getElementById('temperature-slider');
         const temperatureValueSpan = document.getElementById('temperature-value');
         const maxTokensInput = document.getElementById('max-tokens');
-        const chatMessagesDiv = document.getElementById('chat-messages');
-        const userInputTextarea = document.getElementById('user-input');
-        const sendBtn = document.getElementById('send-btn');
-        const charCountSpan = document.getElementById('char-count');
-        const messageCountSpan = document.getElementById('message-count');
-        const clearChatBtn = document.getElementById('clear-btn');
-        const exportChatBtn = document.getElementById('export-btn');
-        const settingsPanelToggle = document.getElementById('settings-panel-toggle');
+        const maxTokensValueSpan = document.getElementById('max-tokens-value');
         const settingsPanel = document.getElementById('settings-panel');
-        const toggleIcon = document.getElementById('toggle-icon');
 
-        // Global Variables
-        let chatHistory = []; // Stores objects { type: 'user'|'bot', text: 'message', timestamp: 'HH:MM AM/PM' }
-        const MAX_USER_INPUT_CHARS = 2000;
-        const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+        const chatHistoryDiv = document.getElementById('chat-history');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const exportBtn = document.getElementById('export-btn');
+        const messageCountSpan = document.getElementById('message-count');
+        const charCountSpan = document.getElementById('char-count');
+
+        let chatHistoryArray = []; // Stores { role: 'user' | 'model', text: string, timestamp: string }
 
         // --- Utility Functions ---
-
-        /**
-         * Formats a Date object into HH:MM AM/PM.
-         * @param {Date} date The date object to format.
-         * @returns {string} The formatted time string.
-         */
-        function formatTime(date) {
-            let hours = date.getHours();
-            let minutes = date.getMinutes();
+        function getTimestamp() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
             const ampm = hours >= 12 ? 'PM' : 'AM';
             hours = hours % 12;
             hours = hours ? hours : 12; // The hour '0' should be '12'
-            minutes = minutes < 10 ? '0' + minutes : minutes;
-            return `${hours}:${minutes} ${ampm}`;
+            return `${hours}:${minutes} ${amppm}`;
         }
 
-        /**
-         * Copies text to the clipboard.
-         * @param {string} text The text to copy.
-         */
-        async function copyTextToClipboard(text) {
-            try {
-                await navigator.clipboard.writeText(text);
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
                 alert('Message copied to clipboard!');
-            } catch (err) {
+            }).catch(err => {
                 console.error('Failed to copy: ', err);
-                alert('Failed to copy message. Please try again.');
+            });
+        }
+
+        function updateCharCount() {
+            const currentLength = userInput.value.length;
+            charCountSpan.textContent = `Chars: ${currentLength}/${MAX_INPUT_CHARS}`;
+            sendBtn.disabled = currentLength === 0 || currentLength > MAX_INPUT_CHARS || apiKeyInput.value.trim() === '';
+        }
+
+        function updateMessageCount() {
+            messageCountSpan.textContent = `Messages: ${chatHistoryArray.length}`;
+        }
+
+        function saveChatHistory() {
+            localStorage.setItem('chatHistory', JSON.stringify(chatHistoryArray));
+        }
+
+        function loadChatHistory() {
+            const storedHistory = localStorage.getItem('chatHistory');
+            if (storedHistory) {
+                chatHistoryArray = JSON.parse(storedHistory);
+                chatHistoryArray.forEach(msg => renderMessage(msg.role, msg.text, msg.timestamp, false)); // Render without saving again
+                updateMessageCount();
             }
         }
 
-        // --- Persistence Functions ---
-
-        /**
-         * Saves current settings to localStorage.
-         */
         function saveSettings() {
-            localStorage.setItem('geminiApiKey', apiKeyInput.value);
             const settings = {
+                apiKey: apiKeyInput.value,
                 systemPrompt: systemPromptTextarea.value,
                 temperature: parseFloat(temperatureSlider.value),
-                maxTokens: parseInt(maxTokensInput.value)
+                maxTokens: parseInt(maxTokensInput.value, 10),
+                settingsPanelOpen: settingsPanel.open // Save panel state
             };
             localStorage.setItem('chatSettings', JSON.stringify(settings));
         }
 
-        /**
-         * Loads settings from localStorage and applies them to the UI.
-         */
         function loadSettings() {
-            apiKeyInput.value = localStorage.getItem('geminiApiKey') || '';
+            const storedSettings = localStorage.getItem('chatSettings');
+            if (storedSettings) {
+                const settings = JSON.parse(storedSettings);
+                apiKeyInput.value = settings.apiKey || '';
+                systemPromptTextarea.value = settings.systemPrompt || '';
+                temperatureSlider.value = settings.temperature !== undefined ? settings.temperature : 1.0;
+                temperatureValueSpan.textContent = temperatureSlider.value;
+                maxTokensInput.value = settings.maxTokens !== undefined ? settings.maxTokens : 1000;
+                maxTokensValueSpan.textContent = maxTokensInput.value;
+                settingsPanel.open = settings.settingsPanelOpen !== undefined ? settings.settingsPanelOpen : false;
 
-            const storedSettings = JSON.parse(localStorage.getItem('chatSettings')) || {};
-            systemPromptTextarea.value = storedSettings.systemPrompt || '';
-            temperatureSlider.value = storedSettings.temperature !== undefined ? storedSettings.temperature : 1.0;
-            maxTokensInput.value = storedSettings.maxTokens !== undefined ? storedSettings.maxTokens : 1000;
-
-            // Update temperature display
-            temperatureValueSpan.textContent = temperatureSlider.value;
-
-            // Apply API key visibility preference if any, otherwise default to password
-            if (apiKeyInput.type === 'text') { // If previously shown
-                showApiKeyCheckbox.checked = true;
+                // Set API key input type based on stored state or default
+                if (showApiKeyCheckbox.checked) {
+                    apiKeyInput.type = 'text';
+                } else {
+                    apiKeyInput.type = 'password';
+                }
             } else {
-                showApiKeyCheckbox.checked = false;
+                // Set defaults if no settings are stored
+                temperatureSlider.value = 1.0;
+                temperatureValueSpan.textContent = '1.0';
+                maxTokensInput.value = 1000;
+                maxTokensValueSpan.textContent = '1000';
             }
+            updateCharCount(); // Update send button state based on loaded API key
         }
 
-        /**
-         * Saves current chat history to localStorage.
-         */
-        function saveChatHistory() {
-            localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
-            updateMessageCount();
-        }
-
-        /**
-         * Loads chat history from localStorage and displays it.
-         */
-        function loadChatHistory() {
-            const storedHistory = JSON.parse(localStorage.getItem('chatHistory'));
-            if (storedHistory) {
-                chatHistory = storedHistory;
-                chatHistory.forEach(msg => displayMessage(msg.type, msg.text, msg.timestamp, false)); // Don't save again
-                chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; // Scroll to bottom
-            }
-            updateMessageCount();
-        }
-
-        // --- UI Update Functions ---
-
-        /**
-         * Updates the character count display for the user input textarea.
-         */
-        function updateCharCount() {
-            const currentLength = userInputTextarea.value.length;
-            const remaining = MAX_USER_INPUT_CHARS - currentLength;
-            charCountSpan.textContent = remaining;
-            charCountSpan.style.color = remaining < 200 ? 'orange' : (remaining < 50 ? 'red' : '#888');
-        }
-
-        /**
-         * Updates the total message count display.
-         */
-        function updateMessageCount() {
-            messageCountSpan.textContent = `Messages: ${chatHistory.length}`;
-        }
-
-        /**
-         * Displays a message in the chat interface.
-         * @param {string} type 'user' or 'bot'.
-         * @param {string} text The message text.
-         * @param {string} timestamp Optional: HH:MM AM/PM string. If not provided, current time is used.
-         * @param {boolean} shouldSave Optional: Whether to save this message to chatHistory. Default true.
-         */
-        function displayMessage(type, text, timestamp = null, shouldSave = true) {
+        // --- Message Rendering ---
+        function renderMessage(role, text, timestamp, shouldSave = true) {
             const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message', `${type}-message`);
+            messageDiv.classList.add('message', role);
 
-            const currentTime = timestamp || formatTime(new Date());
-            const contentSpan = document.createElement('span');
-            contentSpan.textContent = text;
+            const contentDiv = document.createElement('div');
+            contentDiv.classList.add('message-content');
+            contentDiv.textContent = text;
+            messageDiv.appendChild(contentDiv);
 
-            const timeSpan = document.createElement('span');
-            timeSpan.classList.add('timestamp');
-            timeSpan.textContent = currentTime;
+            const footerDiv = document.createElement('div');
+            footerDiv.classList.add('message-footer');
+            const timestampSpan = document.createElement('span');
+            timestampSpan.textContent = timestamp;
+            footerDiv.appendChild(timestampSpan);
 
-            if (type === 'bot') {
-                messageDiv.appendChild(contentSpan); // Content first
-                messageDiv.appendChild(timeSpan);    // Then timestamp
-                const copyBtn = document.createElement('button');
-                copyBtn.classList.add('copy-btn');
-                copyBtn.textContent = 'Copy';
-                copyBtn.onclick = () => copyTextToClipboard(text);
-                messageDiv.appendChild(copyBtn);
-            } else {
-                messageDiv.appendChild(contentSpan); // Content first
-                messageDiv.appendChild(timeSpan);    // Then timestamp
+            if (role === 'model') {
+                const copyButton = document.createElement('button');
+                copyButton.classList.add('copy-btn');
+                copyButton.textContent = 'Copy';
+                copyButton.onclick = () => copyToClipboard(text);
+                footerDiv.appendChild(copyButton);
             }
+            messageDiv.appendChild(footerDiv);
 
-            chatMessagesDiv.appendChild(messageDiv);
-            chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; // Auto-scroll to bottom
+            chatHistoryDiv.appendChild(messageDiv);
+            chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight; // Scroll to bottom
 
             if (shouldSave) {
-                chatHistory.push({ type, text, timestamp: currentTime });
+                chatHistoryArray.push({ role, text, timestamp });
                 saveChatHistory();
+                updateMessageCount();
             }
         }
 
-        // --- Chatbot Core Logic ---
-
-        /**
-         * Sends the user's message to the Gemini API and displays the response.
-         */
+        // --- API Interaction ---
         async function sendMessage() {
-            const userMessage = userInputTextarea.value.trim();
+            const message = userInput.value.trim();
             const apiKey = apiKeyInput.value.trim();
 
             if (!apiKey) {
-                alert('Please enter your Gemini API Key!');
+                alert('Please enter your API Key in the settings.');
+                apiKeyInput.focus();
+                settingsPanel.open = true;
                 return;
             }
-            if (!userMessage) return;
 
-            // Display user message and add to history
-            displayMessage('user', userMessage);
-            userInputTextarea.value = '';
-            updateCharCount();
-            sendBtn.disabled = true; // Disable send button during API call
+            if (!message) return;
+
+            renderMessage('user', message, getTimestamp());
+            userInput.value = '';
+            updateCharCount(); // Disable send button, update char count
+
+            renderMessage('model', 'Generating response...', getTimestamp(), false); // Temporary message
 
             try {
                 const systemPrompt = systemPromptTextarea.value.trim();
                 const temperature = parseFloat(temperatureSlider.value);
-                const maxTokens = parseInt(maxTokensInput.value);
+                const maxTokens = parseInt(maxTokensInput.value, 10);
 
-                const requestBody = {
-                    'contents': [{'parts': [{'text': userMessage}]}],
+                const body = {
+                    'contents': [{'parts': [{'text': message}]}],
                     'generationConfig': {
                         'temperature': temperature,
                         'maxOutputTokens': maxTokens
@@ -543,122 +260,99 @@
                 };
 
                 if (systemPrompt) {
-                    requestBody.systemInstruction = {'parts': [{'text': systemPrompt}]};
+                    body.systemInstruction = {'parts': [{'text': systemPrompt}]};
                 }
 
-                const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+                const response = await fetch(`${API_URL}${apiKey}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(requestBody)
+                    body: JSON.stringify(body)
                 });
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    console.error('API Error:', errorData);
-                    throw new Error(`API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+                    throw new Error(errorData.error ? errorData.error.message : response.statusText);
                 }
 
                 const data = await response.json();
-                const botResponse = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text
-                                    ? data.candidates[0].content.parts[0].text
-                                    : 'No response from bot.';
-                displayMessage('bot', botResponse);
+                const botReply = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] ? data.candidates[0].content.parts[0].text : 'No response from AI.';
+
+                // Remove temporary "Generating response..." message
+                chatHistoryDiv.removeChild(chatHistoryDiv.lastChild);
+
+                renderMessage('model', botReply, getTimestamp());
 
             } catch (error) {
-                console.error('Error sending message:', error);
-                displayMessage('bot', `Error: ${error.message || 'Could not get a response.'}`);
+                console.error('API Error:', error);
+                // Remove temporary "Generating response..." message
+                chatHistoryDiv.removeChild(chatHistoryDiv.lastChild);
+                renderMessage('model', `Error: ${error.message || 'Could not get response from AI.'}`, getTimestamp());
             } finally {
                 sendBtn.disabled = false; // Re-enable send button
             }
         }
 
         // --- Event Listeners ---
-
-        document.addEventListener('DOMContentLoaded', () => {
-            loadSettings();
-            loadChatHistory();
-            updateCharCount(); // Initialize char count
-            updateMessageCount(); // Initialize message count
-            userInputTextarea.focus(); // Focus on input field on load
+        sendBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
         });
+        userInput.addEventListener('input', updateCharCount);
 
-        // API Key input change listener
         apiKeyInput.addEventListener('input', saveSettings);
-
-        // Show/Hide API Key functionality
         showApiKeyCheckbox.addEventListener('change', () => {
             apiKeyInput.type = showApiKeyCheckbox.checked ? 'text' : 'password';
+            saveSettings();
         });
-
-        // Settings Panel toggle
-        settingsPanelToggle.addEventListener('click', () => {
-            const isHidden = settingsPanel.style.display === 'none';
-            settingsPanel.style.display = isHidden ? 'block' : 'none';
-            toggleIcon.innerHTML = isHidden ? '&#9650;' : '&#9660;'; // Change arrow direction
-        });
-
-        // System Prompt persistence
         systemPromptTextarea.addEventListener('input', saveSettings);
-
-        // Temperature slider persistence and display update
         temperatureSlider.addEventListener('input', () => {
             temperatureValueSpan.textContent = temperatureSlider.value;
             saveSettings();
         });
-
-        // Max Output Tokens persistence and validation
         maxTokensInput.addEventListener('input', () => {
-            let value = parseInt(maxTokensInput.value);
-            if (isNaN(value) || value < 100) {
-                value = 100;
-            } else if (value > 8192) {
-                value = 8192;
-            }
-            maxTokensInput.value = value;
+            maxTokensValueSpan.textContent = maxTokensInput.value;
             saveSettings();
         });
+        settingsPanel.addEventListener('toggle', saveSettings);
 
-        // User input and Send button
-        sendBtn.addEventListener('click', sendMessage);
-        userInputTextarea.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault(); // Prevent new line
-                sendMessage();
-            }
-        });
-        userInputTextarea.addEventListener('input', updateCharCount);
 
-        // Chat Management: Clear Chat
-        clearChatBtn.addEventListener('click', () => {
-            if (confirm('Are you sure you want to clear all chat messages? This cannot be undone.')) {
-                chatHistory = [];
-                localStorage.removeItem('chatHistory');
-                chatMessagesDiv.innerHTML = '';
+        clearBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear all chat history? This cannot be undone.')) {
+                chatHistoryArray = [];
+                chatHistoryDiv.innerHTML = '';
+                saveChatHistory();
                 updateMessageCount();
             }
         });
 
-        // Chat Management: Export Chat
-        exportChatBtn.addEventListener('click', () => {
-            const chatData = {
-                timestamp: new Date().toISOString(),
-                settings: JSON.parse(localStorage.getItem('chatSettings')),
-                history: chatHistory
-            };
-            const filename = `gemini_chat_export_${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
-            const blob = new Blob([JSON.stringify(chatData, null, 2)], { type: 'application/json' });
+        exportBtn.addEventListener('click', () => {
+            if (chatHistoryArray.length === 0) {
+                alert('No chat history to export.');
+                return;
+            }
+            const dataStr = JSON.stringify(chatHistoryArray, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = filename;
+            a.download = `gemini_chat_history_${new Date().toISOString().slice(0, 10)}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         });
 
+        // --- Initialization ---
+        window.onload = () => {
+            loadSettings();
+            loadChatHistory();
+            updateCharCount(); // Initial char count and button state
+        };
     </script>
 </body>
 </html>
