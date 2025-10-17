@@ -1,57 +1,77 @@
-# Gemini 2.0 Flash Exp Chatbot
+### Gemini Flash Exp Chatbot
 
-## Summary
-This project delivers a fully functional AI chatbot application built with HTML, CSS (Bootstrap 5), and JavaScript, leveraging the Google Gemini 2.0 Flash Exp API. Designed for academic grading, it demonstrates critical web development skills including API integration, client-side data persistence, responsive UI design, and robust error handling.
+This project is an enhanced web-based chat application designed to interact with the Gemini Flash API. It provides a user-friendly interface for sending prompts and receiving responses, featuring comprehensive chat management, persistent settings, and message enhancements. This tool is ideal for academic exploration of AI capabilities, rapid prototyping, and demonstrating web development skills.
 
-## Setup
-To run this chatbot locally:
-1.  **Save the file:** Save the provided `index.html` content into a file named `index.html` on your computer.
-2.  **Open in browser:** Open the `index.html` file using any modern web browser (e.g., Chrome, Firefox, Edge).
-3.  **Obtain API Key:** Visit [https://ai.google.dev/](https://ai.google.dev/) to get a free Google Gemini API Key.
-4.  **Set API Key:** On the loaded page, enter your Gemini API Key into the "Enter your Google Gemini API Key" password field and click the "Set API Key" button. The key will be securely saved in your browser's local storage.
+#### Summary
 
-## Usage
-Once the `index.html` file is open in your browser and your API key is set:
-1.  **API Key Setup:** Enter your Google Gemini API key into the input field and click "Set API Key". The status will change to "API Key: Set ✓" and the chat input will become active.
-2.  **Chatting:** Type your message into the "Type your message..." input field.
-3.  **Sending Messages:** Click the "Send" button or press `Enter` to send your message to the AI.
-4.  **AI Response:** The AI's response will appear in the chat window, preceded by a "AI is typing..." indicator.
-5.  **Persistence:** Your API key is saved in local storage, so you typically only need to set it once per browser.
+The Gemini Flash Exp Chatbot is a single-page HTML application that leverages client-side JavaScript to communicate with Google's Gemini API. It offers a robust set of features including a collapsible settings panel for API key management, system prompt configuration, temperature control, and max token limits. Chat history is preserved across sessions, and users can clear or export their conversations. Message timestamps and bot response copy functionality improve user experience, along with real-time character and message counters.
 
-## Main Code Logic
+#### Setup
 
-### HTML Structure (`index.html`)
-The HTML document establishes a clean and responsive user interface using Bootstrap 5.
--   **API Key Section:** Contains a password input field (`#api-key-input`), a button (`#set-api-btn`) to save the key to `localStorage`, a status indicator (`#api-status`), and a link to `ai.google.dev`.
--   **Chat Interface:** Features a scrollable container (`#chat-messages`) for displaying messages, a typing indicator (`#typing-indicator`), a text input field (`#user-input`), and a send button (`#send-btn`).
+1.  **Obtain a Gemini API Key**: Visit the Google AI Studio (or equivalent Google Cloud Console section) to generate your API key. This key is necessary for the chatbot to communicate with the Gemini API.
+2.  **Download the project**: Save the `index.html` file to your local machine.
+3.  **Open in Browser**: Simply open the `index.html` file in any modern web browser (e.g., Chrome, Firefox, Edge, Safari). No server-side setup or additional dependencies are required.
 
-### JavaScript Logic
-The core functionality is implemented in the embedded JavaScript:
--   **API Key Management:**
-    -   `apiKey` variable stores the currently active API key.
-    -   `loadApiKey()` retrieves the key from `localStorage` on page load, updating the UI and enabling/disabling chat inputs accordingly.
-    -   `saveApiKey()` stores the entered key in `localStorage` under the key `'geminiApiKey'`, updates the UI, and enables chat.
--   **Chat UI Handling:**
-    -   `updateApiStatus(isSet)`: Dynamically changes the API key status message and color.
-    -   `toggleChatInputs(enable)`: Controls the `disabled` state of the chat input and send button.
-    -   `addMessage(sender, text)`: Appends new messages to the `#chat-messages` container. It dynamically styles messages based on the `sender` ('user' or 'bot'), aligning user messages to the right with a blue background and bot messages to the left with a light gray background, utilizing Bootstrap's flex utilities.
-    -   `showTypingIndicator()` and `hideTypingIndicator()`: Manage the visibility of the "AI is typing..." message.
--   **Real API Integration (`sendMessage()`):**
-    -   Constructs a `POST` request to the Google Gemini API endpoint (`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent`).
-    -   The API key is appended as a query parameter (`?key=`).
-    -   The request body is formatted as `{'contents': [{'parts': [{'text': userMessage}]}]}`.
-    -   Handles the `fetch` call, displaying a typing indicator during the request.
-    -   Parses the API response, extracting the bot's message from `data.candidates[0].content.parts[0].text`.
-    -   Adds both user and bot messages to the chat interface.
--   **Error Handling:**
-    -   A `try...catch` block handles network errors during the `fetch` call.
-    -   Checks `response.ok` for HTTP errors (e.g., 400, 403, 500) and displays specific error messages in the chat, particularly for invalid API keys.
+#### Usage
 
-### Persistence
-The Google Gemini API Key is stored and retrieved from the browser's `localStorage` to persist across sessions, providing a seamless user experience.
+1.  **Enter API Key**: Upon loading the page, input your Gemini API Key into the designated field. You can use the "Show API Key" checkbox to toggle visibility. Your API key will be saved locally in your browser's `localStorage`.
+2.  **Configure Settings (Optional)**:
+    *   Click "Settings" to expand the panel.
+    *   **System Prompt**: Enter a system prompt (e.g., "You are a helpful academic assistant specialized in computer science.") to guide the AI's persona or instructions. This will be included in API requests.
+    *   **Temperature**: Adjust the slider to control the randomness of the AI's responses (0 for deterministic, 2 for highly creative).
+    *   **Max Output Tokens**: Set the maximum length of the AI's generated response.
+    *   All settings are automatically saved to `localStorage`.
+3.  **Start Chatting**: Type your message into the input textarea. The character counter will show remaining characters (max 2000). Press "Send" or hit `Enter` to send your message.
+4.  **View Responses**: The chatbot's responses will appear in the chat history area. Each message includes a timestamp. Bot messages also have a "Copy" button to easily copy their content to your clipboard.
+5.  **Manage Chat**:
+    *   **Message Counter**: Displays the total number of messages in the current chat session.
+    *   **Clear Chat**: Click "Clear Chat" to delete all messages from the history (requires confirmation).
+    *   **Export Chat**: Click "Export Chat" to download your entire conversation history, along with current settings, as a JSON file.
+6.  **Persistence**: Your API key, chat settings, and chat history are automatically saved to your browser's `localStorage` and will be restored when you revisit the page.
 
-## License
-This project is licensed under the MIT License. See the `index.html` footer for details.
+#### Main Code Logic
 
-## Contact
-For any questions or feedback, please reach out to the project maintainer.
+The application's core logic is implemented in a single `script` block within `index.html`, ensuring all features are self-contained and client-side.
+
+*   **DOM Manipulation**: Extensive use of `document.getElementById` to access and manipulate UI elements. Messages are dynamically created and appended to the `#chat-messages` div.
+*   **API Integration**: The `sendMessage()` function is responsible for constructing the API request body. It retrieves the API key, user input, and current settings (system prompt, temperature, max tokens) from the UI. The request body is structured according to the Gemini API specifications, including `contents`, `generationConfig`, and conditionally `systemInstruction`. A `fetch` API call sends the request to the `gemini-pro:generateContent` endpoint.
+*   **Persistence (`localStorage`)**:
+    *   `saveSettings()` and `loadSettings()`: Manage the storage and retrieval of the Gemini API key (under `geminiApiKey`) and other chatbot settings (system prompt, temperature, max tokens, bundled as `chatSettings`) in `localStorage`.
+    *   `saveChatHistory()` and `loadChatHistory()`: Handle the serialization and deserialization of the `chatHistory` array to/from `localStorage`.
+*   **Chat Management**:
+    *   `clearChatBtn` event listener: Prompts user confirmation, clears the `chatHistory` array, removes `chatHistory` from `localStorage`, and empties the `#chat-messages` div.
+    *   `exportChatBtn` event listener: Gathers current settings and `chatHistory`, formats them as JSON, creates a Blob, and triggers a file download.
+*   **Message Enhancements**:
+    *   `displayMessage()`: This function is central to rendering messages. It creates `div` elements, applies appropriate styling (`user-message` or `bot-message`), adds a formatted timestamp (using `formatTime`), and for bot messages, inserts a "Copy" button (`copyTextToClipboard` function handles clipboard interaction). Messages are added to `chatHistory` and `localStorage` unless explicitly told not to.
+    *   `updateCharCount()`: Real-time updates the character counter for the user input.
+    *   `updateMessageCount()`: Displays the current number of messages in the chat.
+*   **Settings Panel**: A `settingsPanelToggle` event listener manages the visibility of the `#settings-panel` div, updating an arrow icon for visual feedback.
+*   **Event Handling**: `DOMContentLoaded` ensures settings and history are loaded on page init. Event listeners are attached to input fields (`input`), buttons (`click`), and the user input textarea (`keydown` for Enter, `input` for char count) to trigger core functionalities.
+
+#### License
+
+MIT License
+<br>
+Copyright (c) 2023-2024 Your Name/Organization
+<br>
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+<br>
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+<br>
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+#### Contact
+
+For questions or feedback, please contact [Your Name/Email/GitHub Profile].
